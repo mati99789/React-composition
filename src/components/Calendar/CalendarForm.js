@@ -1,12 +1,14 @@
 import React from 'react';
-import calendarProvider from './../../apiProvider/calendarProvider';
+import CalendarProvider from './../../apiProvider/calendarProvider';
+import DropDown from './DropDownItem';
+import './CalendarForm.css';
 
 export default class CalendarForm extends React.Component {
-  api = new calendarProvider('http://localhost:3005/meetings');
+  api = new CalendarProvider();
 
   state = {
     fields: {
-      username: '',
+      firstName: '',
       lastName: '',
       email: '',
       date: '',
@@ -15,42 +17,53 @@ export default class CalendarForm extends React.Component {
     errors: {},
     disabledBtn: true,
     matchedItems: [],
+    focus: null,
   };
 
-  isValid = () => {
-    const { username, lastName, email, date, time } = this.state.fields;
+  isValid = (fieldName) => {
+    const value = this.state.fields[fieldName];
 
     let errors = {};
     let isValid = true;
 
-    if (username.trim().length <= 2) {
-      isValid = false;
-
-      errors['username'] = `User Name can't be empty!`;
-    }
-
-    if (lastName.trim().length <= 2) {
-      isValid = false;
-      errors['lastname'] = `Last Name can't be empty!`;
-    }
-
-    if (!email.includes('@')) {
-      isValid = false;
-      errors['email'] = `Incorrect email`;
-    }
-
-    if (!date) {
-      if (date.trim().length <= 0) {
+    if (fieldName === 'firstName') {
+      if (value.trim().length <= 2) {
         isValid = false;
-        errors['date'] = `Incorrect Date!`;
+
+        errors[fieldName] = `User Name can't be empty!`;
       }
     }
 
-    if (!time) {
-      const reg = /([0-9]{2}):([0-9]{2})/;
-      if (!reg.test(time)) {
+    if (fieldName === 'lastName') {
+      if (value.trim().length <= 2) {
         isValid = false;
-        errors['time'] = `Incorrect Time!`;
+        errors[fieldName] = `Last Name can't be empty!`;
+      }
+    }
+
+    if (fieldName === 'email') {
+      if (!value.includes('@')) {
+        isValid = false;
+        errors['email'] = `Incorrect email`;
+      }
+    }
+
+    if (fieldName === 'date') {
+      if (!value) {
+        if (value.trim().length <= 0) {
+          isValid = false;
+          errors['date'] = `Incorrect Date!`;
+        }
+      }
+    }
+
+    if (fieldName === 'time') {
+      if (!value) {
+        const reg = /([0-9]{2}):([0-9]{2})/;
+        if (!reg.test(value)) {
+          isValid = false;
+          errors['time'] = `Incorrect Time!`;
+        }
       }
     }
 
@@ -62,15 +75,15 @@ export default class CalendarForm extends React.Component {
   };
 
   handleChange = (e) => {
-    const formName = e.target.name;
+    const fieldName = e.target.name;
     const fields = this.state.fields;
-    fields[formName] = e.target.value;
+    fields[fieldName] = e.target.value;
 
     this.setState({
       fields,
     });
 
-    const validation = this.isValid();
+    const validation = this.isValid(fieldName);
 
     if (validation) {
       this.setState({
@@ -78,55 +91,80 @@ export default class CalendarForm extends React.Component {
       });
     }
 
-    this.searchMatchedMeeting(e);
+    this.searchMatchedMeeting(fieldName);
   };
 
-  searchMatchedMeeting = (e) => {
-    const { username, lastName, email } = this.state.fields;
-    if (username) {
-      this.api
-        .searchMeeting(`?firstName_like=${username}`)
-        .then((data) => this.addItemToState(data));
-    } else if (lastName) {
-      this.api
-        .searchMeeting(`?lastName_like=${lastName}`)
-        .then((data) => this.addItemToState(data));
-    } else if (email) {
-      this.api
-        .searchMeeting(`?email_like=${email}`)
-        .then((data) => this.addItemToState(data));
+  searchMatchedMeeting = (fieldName) => {
+    const value = this.state.fields[fieldName];
+
+    if (value.length >= 2) {
+      this.api.searchMeeting(`?${fieldName}_like=${value}`).then((data) => {
+        this.addItemToState(data);
+      });
     }
   };
 
   addItemToState = (data) => {
     this.setState({
-      matchedItems: { data },
+      matchedItems: data,
     });
   };
 
-  showMatchedMeeting = () => {
-    if (this.state.matchedItems.data !== undefined) {
-      const item = this.state.matchedItems.data.map((item) =>
-        console.log(item)
-      );
-    }
-  };
-  render() {
+  handleSubmit = (e) => {
     const { submitHandler } = this.props;
+
+    submitHandler(e, this.resetForm);
+  };
+
+  resetForm = () => {
+    this.setState({
+      fields: {
+        firstName: '',
+        lastName: '',
+        email: '',
+        date: '',
+        time: '',
+      },
+    });
+  };
+
+  handleFocus = (e) => {
+    this.setState({ focus: e.target.name });
+  };
+
+  clickHandle = (e) => {
+    console.log(e.target.value);
+  };
+
+  renderDropDown = () => {
+    const matchedValues = this.state.matchedItems.map((item) => {
+      return (
+        <DropDown
+          className="autocomplete"
+          choosItem={this.clickHandle}
+          content={item[this.state.focus]}
+        />
+      );
+    });
+    return <ul>{matchedValues}</ul>;
+  };
+
+  render() {
     return (
-      <form onSubmit={submitHandler}>
-        <label>
+      <form className="formContainer" onSubmit={this.handleSubmit}>
+        <label className="formContainer__input" onFocus={this.handleFocus}>
           FirstName:{' '}
           <input
             type="text"
-            name="username"
+            name="firstName"
             onChange={this.handleChange}
             placeholder="First Name"
-            value={this.state.fields.username}
+            value={this.state.fields.firstName}
           />
-          <span style={{ color: 'red' }}>{this.state.errors['username']}</span>
+          <span style={{ color: 'red' }}>{this.state.errors['firstName']}</span>
+          {this.state.focus === 'firstName' && this.renderDropDown()}
         </label>{' '}
-        <label>
+        <label className="formContainer__input" onFocus={this.handleFocus}>
           LastName:{' '}
           <input
             type="text"
@@ -135,9 +173,10 @@ export default class CalendarForm extends React.Component {
             onChange={this.handleChange}
             value={this.state.fields.lastName}
           />
-          <span style={{ color: 'red' }}>{this.state.errors['lastname']}</span>
+          <span style={{ color: 'red' }}>{this.state.errors['lastName']}</span>
+          {this.state.focus === 'lastName' && this.renderDropDown()}
         </label>{' '}
-        <label>
+        <label className="formContainer__input" onFocus={this.handleFocus}>
           Email:{' '}
           <input
             type="email"
@@ -147,8 +186,9 @@ export default class CalendarForm extends React.Component {
             value={this.state.fields.email}
           />
           <span style={{ color: 'red' }}>{this.state.errors['email']}</span>
+          {this.state.focus === 'email' && this.renderDropDown()}
         </label>{' '}
-        <label>
+        <label className="formContainer__input" onFocus={this.handleFocus}>
           Date:{' '}
           <input
             type="date"
@@ -158,8 +198,9 @@ export default class CalendarForm extends React.Component {
             value={this.state.fields.date}
           />
           <span style={{ color: 'red' }}>{this.state.errors['date']}</span>
+          {this.state.focus === 'date' && this.renderDropDown()}
         </label>
-        <label>
+        <label className="formContainer__input" onFocus={this.handleFocus}>
           Time:{' '}
           <input
             type="time"
@@ -169,13 +210,14 @@ export default class CalendarForm extends React.Component {
             value={this.state.fields.time}
           />
           <span style={{ color: 'red' }}>{this.state.errors['time']}</span>
+          {this.state.focus === 'time' && this.renderDropDown()}
         </label>
         <input
           type="submit"
           value="Send Data"
           disabled={this.state.disabledBtn}
+          className="formContainer__btn"
         />
-        <div>{this.showMatchedMeeting()}</div>
       </form>
     );
   }

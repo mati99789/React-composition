@@ -1,6 +1,6 @@
 export default class API {
-  constructor(url) {
-    this.url = url;
+  constructor() {
+    this.url = 'http://localhost:3005/meetings';
   }
 
   loadData() {

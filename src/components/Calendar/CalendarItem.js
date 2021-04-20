@@ -1,14 +1,14 @@
 import React from 'react';
+import './CalendarItem.css';
 
 export default class CalendarItem extends React.Component {
   render() {
     const { firstName, lastName, email, date, time } = this.props;
     return (
-      <li>
+      <li className="meetingItem">
         <div>
-          <p>
-            First Name: {firstName} Last Name: {lastName}
-          </p>
+          <p>First Name: {firstName}</p>
+          <p>Last Name: {lastName}</p>
           <p>Email: {email}</p>
           <p>
             Date: {date}, Time: {time}

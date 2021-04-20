@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import API from '../../apiProvider/calendarProvider';
 import CalendarList from './CalendarList';
 import CalendarForm from './CalendarForm';
+import './Calendar.css';
 
 export class Calendar extends Component {
-  api = new API('http://localhost:3005/meetings');
+  api = new API();
 
   state = {
     meetings: [],
@@ -25,7 +26,7 @@ export class Calendar extends Component {
       });
   }
 
-  submitHandler = (e) => {
+  submitHandler = (e, clearForm) => {
     e.preventDefault();
 
     const { username, lastName, email, date, time } = e.target.elements;
@@ -37,28 +38,21 @@ export class Calendar extends Component {
       time: time.value,
     };
 
-    this.api
-      .addData(data)
-      .then((meeting) => {
-        this.setState({
-          meetings: [...this.state.meetings, meeting],
-        });
-      })
-      .finally(() => {
-        this.clearData(e);
+    this.api.addData(data).then((meeting) => {
+      this.setState({
+        meetings: [...this.state.meetings, meeting],
       });
-  };
 
-  clearData = (e) => {
-    const allInputs = e.target.elements;
-    console.log(allInputs);
+      clearForm();
+    });
   };
 
   render() {
     return (
       <div>
-        <CalendarList data={this.state.meetings} />
+        <h1>Meeting</h1>
         <CalendarForm submitHandler={this.submitHandler} />
+        <CalendarList data={this.state.meetings} />
       </div>
     );
   }

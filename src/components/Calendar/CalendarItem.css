@@ -1,0 +1,7 @@
+.meetingItem {
+    display: flex;
+    justify-content: center;
+    background-color: #b0e5eb;
+    margin: 1rem;
+    width: 50%;
+}

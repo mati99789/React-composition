@@ -1,5 +1,6 @@
 import React from 'react';
 import CalendarItem from './CalendarItem';
+import './CalendarList.css';
 
 export default class CalendarList extends React.Component {
   render() {
@@ -7,6 +8,6 @@ export default class CalendarList extends React.Component {
     const meetings = data.map((meeting) => (
       <CalendarItem key={meeting.id} {...meeting} />
     ));
-    return <ul>{meetings}</ul>;
+    return <ul className="meetingsList">{meetings}</ul>;
   }
 }
