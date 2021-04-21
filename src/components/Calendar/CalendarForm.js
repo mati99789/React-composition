@@ -27,7 +27,7 @@ export default class CalendarForm extends React.Component {
     let isValid = true;
 
     if (fieldName === 'firstName') {
-      if (value.trim().length <= 2) {
+      if (value.trim().length < 2) {
         isValid = false;
 
         errors[fieldName] = `User Name can't be empty!`;
@@ -35,7 +35,7 @@ export default class CalendarForm extends React.Component {
     }
 
     if (fieldName === 'lastName') {
-      if (value.trim().length <= 2) {
+      if (value.trim().length < 2) {
         isValid = false;
         errors[fieldName] = `Last Name can't be empty!`;
       }
@@ -97,7 +97,7 @@ export default class CalendarForm extends React.Component {
   searchMatchedMeeting = (fieldName) => {
     const value = this.state.fields[fieldName];
 
-    if (value.length >= 2) {
+    if (value.trim().length >= 2) {
       this.api.searchMeeting(`?${fieldName}_like=${value}`).then((data) => {
         this.addItemToState(data);
       });
@@ -133,7 +133,13 @@ export default class CalendarForm extends React.Component {
   };
 
   clickHandle = (e) => {
-    console.log(e.target.value);
+    const fieldName = this.state.focus;
+    const fields = this.state.fields;
+    fields[fieldName] = e.target.textContent;
+    this.setState({
+      fields,
+      focus: null,
+    });
   };
 
   renderDropDown = () => {
@@ -141,8 +147,9 @@ export default class CalendarForm extends React.Component {
       return (
         <DropDown
           className="autocomplete"
-          choosItem={this.clickHandle}
+          chooseItem={this.clickHandle}
           content={item[this.state.focus]}
+          key={parseInt(Math.random() * 99)} // To jest tylko wylacznie w ramach testu.
         />
       );
     });

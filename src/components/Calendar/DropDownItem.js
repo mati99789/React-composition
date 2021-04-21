@@ -2,7 +2,7 @@ import React from 'react';
 
 const DropDownItem = (props) => {
   return (
-    <li onClick={props.choosItem} className={props.className}>
+    <li onClick={props.chooseItem} className={props.className}>
       {props.content}
     </li>
   );
