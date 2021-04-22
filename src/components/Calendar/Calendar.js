@@ -29,9 +29,9 @@ export class Calendar extends Component {
   submitHandler = (e, clearForm) => {
     e.preventDefault();
 
-    const { username, lastName, email, date, time } = e.target.elements;
+    const { firstName, lastName, email, date, time } = e.target.elements;
     const data = {
-      firstName: username.value,
+      firstName: firstName.value,
       lastName: lastName.value,
       email: email.value,
       date: date.value,

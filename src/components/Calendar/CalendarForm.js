@@ -84,8 +84,9 @@ export default class CalendarForm extends React.Component {
     });
 
     const validation = this.isValid(fieldName);
+    const checkInputs = Object.values(fields).every((item) => item.length > 0);
 
-    if (validation) {
+    if (validation & checkInputs) {
       this.setState({
         disabledBtn: false,
       });
@@ -133,11 +134,12 @@ export default class CalendarForm extends React.Component {
   };
 
   clickHandle = (e) => {
+    e.preventDefault();
     const fieldName = this.state.focus;
     const fields = this.state.fields;
     fields[fieldName] = e.target.textContent;
     this.setState({
-      fields,
+      fields: { ...this.state.fields },
       focus: null,
     });
   };
@@ -153,7 +155,7 @@ export default class CalendarForm extends React.Component {
         />
       );
     });
-    return <ul>{matchedValues}</ul>;
+    return <ul className={'autocompleteList'}>{matchedValues}</ul>;
   };
 
   render() {
